@@ -22,14 +22,15 @@ mongoose.connect(mongoURI, {
 }).catch((err) => {
   console.error('MongoDB connection error:', err);
 });
-
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  email: { type: String, default: null },
+  email: { type: String, unique: true, sparse: true, default: null },
   isAnonymous: { type: Boolean, default: false },
 });
+
 const User = mongoose.model('User', userSchema);
+
 
 const blogSchema = new mongoose.Schema({
   title: String,
@@ -116,7 +117,8 @@ app.post('/api/blogs/:id/like', authenticateJWT, async (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, email } = req.body;
+  console.log(email);
 
   if (!username || !password) {
     return res.status(400).json({ message: 'Username and password are required' });
@@ -129,9 +131,8 @@ app.post('/api/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword });
+    const newUser = new User({ username, password: hashedPassword, email });
     await newUser.save();
-
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error registering user', error: error.message });
@@ -140,10 +141,13 @@ app.post('/api/register', async (req, res) => {
 
 
 app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { usernameOrEmail, password } = req.body;
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({
+      $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }]
+    });
+
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -272,18 +276,10 @@ app.put('/api/blogs/:id', authenticateJWT, async (req, res) => {
 
 app.delete('/api/blogs/:id', authenticateJWT, async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id);
-    if (!blog) {
+    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
+    if (!deletedBlog) {
       return res.status(404).json({ message: 'Blog not found' });
     }
-    if (blog.author.toString() !== req.user.userId) {
-      return res.status(403).json({ message: 'You are not authorized to delete this blog' });
-    }
-
-    await Comment.deleteMany({ blog: req.params.id });
-
-    await Blog.findByIdAndDelete(req.params.id);
-
     res.json({ message: 'Blog deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting blog', error: error.message });
