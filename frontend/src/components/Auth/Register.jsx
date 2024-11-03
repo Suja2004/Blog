@@ -6,6 +6,7 @@ const Register = () => {
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('');
     const [error, setError] = useState('');
     const [passwordStrength, setPasswordStrength] = useState('');
 
@@ -33,25 +34,21 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (passwordStrength === 'Weak') {
-            setError('Please choose a stronger password.');
-            return;
-        }
-
         try {
             setError('');
-            await axios.post('http://localhost:5000/api/register', { username, password });
+            await axios.post('http://localhost:5000/api/register', { username, password,email });
             alert('Registration successful! You can now log in.');
-            navigate('/login'); 
+            navigate('/login');
         } catch (error) {
-            if (error.response && error.response.status === 409) {
-                setError('Username already taken');
+            console.error('Error registering:', error); // Log error for debugging
+            if (error.response && error.response.data) {
+                setError(error.response.data.message); // Display specific error message
             } else {
                 setError('Registration failed. Please try again.');
             }
-            console.error('Error registering:', error);
         }
     };
+
 
     return (
         <div className="auth-container">

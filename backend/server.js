@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -134,17 +134,22 @@ app.post('/api/blogs/:id/like', authenticateJWT, async (req, res) => {
 // Register Route
 app.post('/api/register', async (req, res) => {
   const { username, password, email } = req.body;
-
-  // Hash password before saving
-  const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    const newUser = new User({ username, password: hashedPassword, email });
+    // Check if the username already exists
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Username already taken' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, password: hashedPassword,email });
     await newUser.save();
+
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
-    res.status(400).json({ message: 'Error registering user', error: error.message });
+    res.status(500).json({ message: 'Error registering user', error: error.message });
   }
 });
+
 
 // Login Route with Token Expiry
 app.post('/api/login', async (req, res) => {
@@ -202,13 +207,13 @@ app.get('/api/profile', authenticateJWT, async (req, res) => {
 
 app.put('/api/profile', authenticateJWT, async (req, res) => {
   const { email, isAnonymous } = req.body;
-  const userId = req.user.userId; 
+  const userId = req.user.userId;
 
   try {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { email, isAnonymous }, 
-      { new: true, runValidators: true } 
+      { email, isAnonymous },
+      { new: true, runValidators: true }
     );
 
     res.status(200).json({ message: 'Profile updated successfully!', user: updatedUser });
