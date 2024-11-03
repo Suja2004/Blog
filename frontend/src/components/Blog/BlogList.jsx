@@ -21,7 +21,7 @@ const BlogList = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/blogs');
+        const response = await axios.get('https://blog-backend-oy0s.onrender.com/api/blogs');
         const sortedBlogs = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setBlogs(sortedBlogs);
       } catch (error) {
@@ -35,16 +35,15 @@ const BlogList = () => {
   }, []);
 
   const handleDelete = async () => {
-    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+    const token = localStorage.getItem('token');
   
     if (blogToDelete) {
       try {
-        await axios.delete(`http://localhost:5000/api/blogs/${blogToDelete}`, {
+        await axios.delete(`https://blog-backend-oy0s.onrender.com/api/blogs/${blogToDelete}`, {
           headers: {
-            Authorization: `Bearer ${token}` // Include the token in the headers
+            Authorization: `Bearer ${token}` 
           }
         });
-        // Update the blogs state after successful deletion
         setBlogs(blogs.filter(blog => blog._id !== blogToDelete));
         setBlogToDelete(null);
       } catch (error) {
@@ -88,7 +87,6 @@ const BlogList = () => {
                   </>
                 )}
               </div>
-              {/* Displaying likes and comments count */}
               <div className="blog-stats">
                 <p className="likes">{blog.likes} Likes</p>
                 <p className="comments">{blog.commentCount} Comments</p>
