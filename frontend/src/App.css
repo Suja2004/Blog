@@ -366,7 +366,7 @@ textarea {
   color: #ff283d;
 }
 
-.link:hover{
+.link:hover {
   text-decoration: underline;
 }
 
@@ -553,4 +553,84 @@ textarea {
   font-size: 14px;
   resize: vertical;
   height: 100px;
+}
+
+.hamburger {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  nav {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 60%;
+    padding-bottom: 1rem;
+    background-color: #2a5298;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .navbar-links.show {
+    transform: translateX(0);
+  }
+
+  .navbar-links a {
+    padding: 1rem;
+    width: 80%;
+    text-align: left;
+    border-bottom: 1px solid #444;
+  }
+
+  nav a.active {
+    text-decoration: none;
+  }
+
+  .hamburger {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: white;
+    display: block;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  input[type="text"],
+  input[type="url"],
+  textarea {
+    font-size: 0.85rem;
+  }
+
+  .create-blog {
+    margin-top: 0;
+    padding-top: .2rem;
+  }
+
+  .create-blog h3 {
+    margin-top: 0;
+  }
+
+  .link-container {
+    margin: 0;
+    max-height: 20vh;
+    overflow-y: auto;
+  }
+
+  .link-inputs {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 4px solid#000000;
+  }
+
+  .link-inputs button {
+    margin-bottom: 10px;
+  }
 }
