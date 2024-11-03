@@ -24,24 +24,12 @@ const UserProfile = () => {
         fetchUserDetails();
     }, []);
 
-    const checkEmailDuplication = async (email) => {
-        try {
-            const response = await axios.post('https://blog-backend-oy0s.onrender.com/api/check-email', { email });
-            return response.data.exists; 
-        } catch (error) {
-            console.error('Error checking email duplication:', error);
-            return true; 
-        }
-    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if (await checkEmailDuplication(user.email)) {
-                setError('Email is already in use.');
-                return;
-            }
-
+            
             const token = localStorage.getItem('token');
             await axios.put('https://blog-backend-oy0s.onrender.com/api/profile', user, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -75,7 +63,7 @@ const UserProfile = () => {
                     value={user.email}
                     onChange={(e) => setUser({ ...user, email: e.target.value })}
                     placeholder="Email"
-                    required
+                    readOnly
                 />
                 <label>
                     <input
