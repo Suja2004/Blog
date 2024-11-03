@@ -24,13 +24,12 @@ const BlogPost = () => {
 
     const fetchBlogData = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/blogs/${id}`);
+        const response = await axios.get(`https://blog-backend-oy0s.onrender.com/api/blogs/${id}`);
         setBlog(response.data);
         const userId = localStorage.getItem('userId');
         setHasLiked(response.data.likedBy.includes(userId));
 
-        // Fetch comments
-        const commentsResponse = await axios.get(`http://localhost:5000/api/blogs/${id}/comments`);
+        const commentsResponse = await axios.get(`https://blog-backend-oy0s.onrender.com/api/blogs/${id}/comments`);
         setComments(commentsResponse.data);
       } catch (error) {
         console.error('Error fetching blog:', error);
@@ -54,7 +53,7 @@ const BlogPost = () => {
       return;
     }
     try {
-      const response = await axios.post(`http://localhost:5000/api/blogs/${id}/comments`, {
+      const response = await axios.post(`https://blog-backend-oy0s.onrender.com/api/blogs/${id}/comments`, {
         content: newComment,
         author: localStorage.getItem('userId'),
       });
@@ -85,7 +84,7 @@ const BlogPost = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/blogs/${id}/like`,
+        `https://blog-backend-oy0s.onrender.com/api/blogs/${id}/like`,
         {},
         {
           headers: {
