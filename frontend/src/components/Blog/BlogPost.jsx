@@ -45,17 +45,25 @@ const BlogPost = () => {
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
+    if (!isLoggedIn) {
+      setPopupMessage('Please log in to add comment.');
+      setIsPopupVisible(true);
+      setTimeout(() => {
+        setIsPopupVisible(false);
+      }, 3000);
+      return;
+    }
     try {
       const response = await axios.post(`http://localhost:5000/api/blogs/${id}/comments`, {
         content: newComment,
         author: localStorage.getItem('userId'),
       });
       setComments([...comments, response.data]);
-      setNewComment(''); 
+      setNewComment('');
     } catch (error) {
       if (error.response && error.response.status === 403) {
         alert("Your session has expired. Please log in again.");
-        navigate('/login'); // Change to your login route
+        navigate('/login');
       } else {
         console.error('Error adding comment:', error);
         setError('Failed to add comment.');
@@ -108,7 +116,7 @@ const BlogPost = () => {
       <h1>{blog.title}</h1>
       <div className="blog-content" dangerouslySetInnerHTML={{ __html: blog.content }} />
       <button className="like-button" onClick={handleLikeToggle}>
-        <FontAwesomeIcon icon={hasLiked ? solidThumbsUp :  regularThumbsUp} />
+        <FontAwesomeIcon icon={hasLiked ? solidThumbsUp : regularThumbsUp} />
       </button>
       <span className="like-count">{blog.likes} {blog.likes === 1 ? 'like' : 'likes'}</span>
       {isPopupVisible && <div className="popup">{popupMessage}</div>}

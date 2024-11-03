@@ -272,10 +272,18 @@ app.put('/api/blogs/:id', authenticateJWT, async (req, res) => {
 
 app.delete('/api/blogs/:id', authenticateJWT, async (req, res) => {
   try {
-    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
-    if (!deletedBlog) {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
       return res.status(404).json({ message: 'Blog not found' });
     }
+    if (blog.author.toString() !== req.user.userId) {
+      return res.status(403).json({ message: 'You are not authorized to delete this blog' });
+    }
+
+    await Comment.deleteMany({ blog: req.params.id });
+
+    await Blog.findByIdAndDelete(req.params.id);
+
     res.json({ message: 'Blog deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting blog', error: error.message });
