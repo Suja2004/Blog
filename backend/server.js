@@ -8,14 +8,12 @@ const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET; // JWT secret from environment variables
+const JWT_SECRET = process.env.JWT_SECRET;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Connect to MongoDB
-const mongoURI = process.env.MONGODB_URI; // Use environment variable for MongoDB URI
+const mongoURI = process.env.MONGODB_URI;
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -25,7 +23,6 @@ mongoose.connect(mongoURI, {
   console.error('MongoDB connection error:', err);
 });
 
-// User Schema
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -34,19 +31,16 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// Blog Schema Update
 const blogSchema = new mongoose.Schema({
   title: String,
   content: String,
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   likes: { type: Number, default: 0 },
   likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  commentCount: { type: Number, default: 0 }, // New field for comment count
+  commentCount: { type: Number, default: 0 },
 }, { timestamps: true });
 const Blog = mongoose.model('Blog', blogSchema);
 
-
-// Comment Schema
 const commentSchema = new mongoose.Schema({
   blog: { type: mongoose.Schema.Types.ObjectId, ref: 'Blog', required: true },
   content: { type: String, required: true },
@@ -54,29 +48,27 @@ const commentSchema = new mongoose.Schema({
 }, { timestamps: true });
 const Comment = mongoose.model('Comment', commentSchema);
 
-// Middleware for JWT Authentication
 const authenticateJWT = (req, res, next) => {
   const token = req.header('Authorization')?.split(' ')[1];
   if (!token) {
     console.log('No token provided');
-    return res.sendStatus(403); // Forbidden
+    return res.sendStatus(403);
   }
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
       console.log('Token verification failed:', err);
-      return res.sendStatus(403); // Forbidden
+      return res.sendStatus(403);
     }
-    req.user = user; // Set the user to req.user for later use
+    req.user = user;
     next();
   });
 };
 
-// Add comment route
 app.post('/api/blogs/:id/comments', async (req, res) => {
   try {
     const { id } = req.params;
-    const { content, author } = req.body; // Expect author ID to be provided
+    const { content, author } = req.body;
 
     const newComment = new Comment({
       blog: id,
@@ -84,8 +76,6 @@ app.post('/api/blogs/:id/comments', async (req, res) => {
       author,
     });
     await newComment.save();
-
-    // Increment the commentCount for the blog
     await Blog.findByIdAndUpdate(id, { $inc: { commentCount: 1 } });
 
     res.status(201).json(newComment);
@@ -94,8 +84,6 @@ app.post('/api/blogs/:id/comments', async (req, res) => {
   }
 });
 
-
-// Get comments for a blog
 app.get('/api/blogs/:id/comments', async (req, res) => {
   try {
     const comments = await Comment.find({ blog: req.params.id }).populate('author', 'username');
@@ -105,21 +93,17 @@ app.get('/api/blogs/:id/comments', async (req, res) => {
   }
 });
 
-// Like/unlike blog route
 app.post('/api/blogs/:id/like', authenticateJWT, async (req, res) => {
-  const userId = req.user.userId; // Use userId from the verified token
+  const userId = req.user.userId;
   try {
     const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ message: 'Blog not found' });
 
-    // Check if the user has already liked the blog
     const index = blog.likedBy.indexOf(userId);
     if (index === -1) {
-      // User has not liked the blog, add them to likedBy and increment likes
       blog.likedBy.push(userId);
       blog.likes += 1;
     } else {
-      // User has already liked the blog, remove them and decrement likes
       blog.likedBy.splice(index, 1);
       blog.likes -= 1;
     }
@@ -131,17 +115,21 @@ app.post('/api/blogs/:id/like', authenticateJWT, async (req, res) => {
   }
 });
 
-// Register Route
 app.post('/api/register', async (req, res) => {
-  const { username, password, email } = req.body;
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username and password are required' });
+  }
+
   try {
-    // Check if the username already exists
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ message: 'Username already taken' });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword, email });
+    const newUser = new User({ username, password: hashedPassword });
     await newUser.save();
 
     res.status(201).json({ message: 'User registered successfully' });
@@ -151,7 +139,6 @@ app.post('/api/register', async (req, res) => {
 });
 
 
-// Login Route with Token Expiry
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -161,9 +148,8 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Generate JWT token with expiry
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-    const expiry = Date.now() + 3600000; // 1 hour in milliseconds
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '10h' });
+    const expiry = Date.now() + 36000000;
 
     res.json({ token, userId: user._id, expiry });
   } catch (error) {
@@ -171,14 +157,12 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Token Refresh Route
 app.post('/api/refresh', authenticateJWT, (req, res) => {
   const userId = req.user.userId;
 
   try {
-    // Generate a new token
     const newToken = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '1h' });
-    const newExpiry = Date.now() + 3600000; // 1 hour in milliseconds
+    const newExpiry = Date.now() + 3600000;
 
     res.json({ token: newToken, expiry: newExpiry });
   } catch (error) {
@@ -222,18 +206,17 @@ app.put('/api/profile', authenticateJWT, async (req, res) => {
     res.status(400).json({ message: 'Error updating profile', error: error.message });
   }
 });
-// In your backend
+
 app.post('/api/check-email', async (req, res) => {
   const { email } = req.body;
   try {
     const existingUser = await User.findOne({ email });
-    res.json({ exists: !!existingUser }); // Respond with whether the email exists
+    res.json({ exists: !!existingUser });
   } catch (error) {
     res.status(500).json({ message: 'Error checking email duplication' });
   }
 });
 
-// Get all blogs
 app.get('/api/blogs', async (req, res) => {
   try {
     const blogs = await Blog.find()
@@ -245,7 +228,6 @@ app.get('/api/blogs', async (req, res) => {
   }
 });
 
-// Get a single blog
 app.get('/api/blogs/:id', async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id).populate('author', 'username');
@@ -258,10 +240,9 @@ app.get('/api/blogs/:id', async (req, res) => {
   }
 });
 
-// Create a blog
 app.post('/api/blogs', authenticateJWT, async (req, res) => {
   const { title, content } = req.body;
-  const newBlog = new Blog({ title, content, author: req.user.userId }); // Use userId from token
+  const newBlog = new Blog({ title, content, author: req.user.userId });
 
   try {
     await newBlog.save();
@@ -271,7 +252,6 @@ app.post('/api/blogs', authenticateJWT, async (req, res) => {
   }
 });
 
-// Update a blog
 app.put('/api/blogs/:id', authenticateJWT, async (req, res) => {
   const { title, content } = req.body;
 
@@ -284,31 +264,24 @@ app.put('/api/blogs/:id', authenticateJWT, async (req, res) => {
     if (!updatedBlog) {
       return res.status(404).json({ message: 'Blog not found' });
     }
-    res.json(updatedBlog);
+    res.status(200).json(updatedBlog);
   } catch (error) {
     res.status(400).json({ message: 'Error updating blog', error: error.message });
   }
 });
 
-// Delete a blog
-// Delete a blog and its comments
 app.delete('/api/blogs/:id', authenticateJWT, async (req, res) => {
   try {
-    // First, delete the comments associated with the blog
-    await Comment.deleteMany({ blog: req.params.id });
-
-    // Then, delete the blog
     const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
     if (!deletedBlog) {
       return res.status(404).json({ message: 'Blog not found' });
     }
-
-    res.json({ message: 'Blog and associated comments deleted successfully' });
+    res.json({ message: 'Blog deleted successfully' });
   } catch (error) {
-    res.status(400).json({ message: 'Error deleting blog', error: error.message });
+    res.status(500).json({ message: 'Error deleting blog', error: error.message });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

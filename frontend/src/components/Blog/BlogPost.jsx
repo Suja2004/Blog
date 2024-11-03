@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp as regularThumbsUp } from '@fortawesome/free-regular-svg-icons';
+import { faThumbsUp as solidThumbsUp } from '@fortawesome/free-solid-svg-icons';
+
 
 const BlogPost = () => {
   const { id } = useParams();
@@ -26,7 +28,7 @@ const BlogPost = () => {
         setBlog(response.data);
         const userId = localStorage.getItem('userId');
         setHasLiked(response.data.likedBy.includes(userId));
-        
+
         // Fetch comments
         const commentsResponse = await axios.get(`http://localhost:5000/api/blogs/${id}/comments`);
         setComments(commentsResponse.data);
@@ -37,7 +39,7 @@ const BlogPost = () => {
         setLoading(false);
       }
     };
-    
+
     fetchBlogData();
   }, [id]);
 
@@ -48,11 +50,16 @@ const BlogPost = () => {
         content: newComment,
         author: localStorage.getItem('userId'),
       });
-      setComments([...comments, response.data]); // Add new comment to local state
-      setNewComment(''); // Clear the input
+      setComments([...comments, response.data]);
+      setNewComment(''); 
     } catch (error) {
-      console.error('Error adding comment:', error);
-      setError('Failed to add comment.');
+      if (error.response && error.response.status === 403) {
+        alert("Your session has expired. Please log in again.");
+        navigate('/login'); // Change to your login route
+      } else {
+        console.error('Error adding comment:', error);
+        setError('Failed to add comment.');
+      }
     }
   };
 
@@ -81,8 +88,14 @@ const BlogPost = () => {
       setBlog(response.data);
       setHasLiked(!hasLiked);
     } catch (error) {
-      console.error('Error toggling like:', error);
-      setError('Failed to toggle like.');
+      if (error.response && error.response.status === 403) {
+        alert("Your session has expired. Please log in again.");
+        navigate('/login');
+      } else {
+        console.error('Error toggling like:', error);
+        setError('Failed to toggle like.');
+
+      }
     }
   };
 
@@ -95,8 +108,7 @@ const BlogPost = () => {
       <h1>{blog.title}</h1>
       <div className="blog-content" dangerouslySetInnerHTML={{ __html: blog.content }} />
       <button className="like-button" onClick={handleLikeToggle}>
-        <FontAwesomeIcon icon={hasLiked ? faThumbsDown : faThumbsUp} />
-        {/* {hasLiked ? ' Unlike' : ' Like'} */}
+        <FontAwesomeIcon icon={hasLiked ? solidThumbsUp :  regularThumbsUp} />
       </button>
       <span className="like-count">{blog.likes} {blog.likes === 1 ? 'like' : 'likes'}</span>
       {isPopupVisible && <div className="popup">{popupMessage}</div>}

@@ -10,26 +10,19 @@ const EditBlog = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const stripHtml = (html) => {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    return doc.body.textContent || "";
-  };
-
   useEffect(() => {
     const fetchBlog = async () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/blogs/${id}`);
         setTitle(response.data.title);
-        
-        // Use stripHtml to remove HTML tags before setting content
-        setContent(stripHtml(response.data.content));
+        setContent(response.data.content); // Preserve HTML formatting
 
         // Extract unique links from content
         const linkMatches = [...response.data.content.matchAll(/<a href="(.*?)">(.*?)<\/a>/g)];
-        const existingLinks = Array.from(new Set(linkMatches.map(match => match[1]))).map(url => {
-          const textMatch = linkMatches.find(match => match[1] === url);
-          return { text: textMatch[2], url: url };
-        });
+        const existingLinks = linkMatches.map(match => ({
+          text: match[2],
+          url: match[1],
+        }));
         
         setLinks(existingLinks.length ? existingLinks : [{ text: '', url: '' }]); // Set links or initialize with an empty link
       } catch (error) {
@@ -57,39 +50,42 @@ const EditBlog = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if (links.some(link => !link.text || !link.url)) {
-    //   setError('All links must have text and a URL.');
-    //   return;
-    // }
-
+  
     // Create formatted content with hyperlinks
     let formattedContent = content;
+    const existingLinkUrls = new Set();
+  
+    const linkMatches = [...content.matchAll(/<a href="(.*?)">(.*?)<\/a>/g)];
+    linkMatches.forEach(match => existingLinkUrls.add(match[1]));
+  
     links.forEach(link => {
-      if (link.text && link.url) {
+      if (link.text && link.url && !existingLinkUrls.has(link.url)) {
         formattedContent += ` <a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.text}</a>`;
       }
     });
-
+  
+    const token = localStorage.getItem('token');
+    console.log("Submitting blog with token:", token); // Log the token
+    console.log("Content to update:", formattedContent); // Log the content being sent
+  
     try {
-      const token = localStorage.getItem('token'); // Retrieve token from local storage
-    
-      // Make a PUT request to update the blog
       await axios.put(`http://localhost:5000/api/blogs/${id}`, {
         title,
         content: formattedContent
       }, {
         headers: {
-          Authorization: `Bearer ${token}` // Include the authorization header
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         }
       });
-    
-      // Redirect to the updated blog post page
+  
       navigate(`/blogs/${id}`);
     } catch (error) {
       setError('Error updating blog. Please try again later.');
       console.error('Error updating blog:', error);
     }
   };
+  
 
   const handleCancel = () => {
     navigate(`/blogs/${id}`); // Redirect to the blog post
@@ -121,14 +117,12 @@ const EditBlog = () => {
               value={link.text}
               onChange={(e) => handleLinkChange(index, 'text', e.target.value)}
               placeholder="Text to hyperlink"
-              
             />
             <input
               type="url"
               value={link.url}
               onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
               placeholder="URL"
-              
             />
             <button type="button" onClick={() => handleRemoveLink(index)}>Remove</button>
           </div>

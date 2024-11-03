@@ -41,7 +41,7 @@ const CreateBlog = () => {
       return;
     }
 
-    let formattedContent = content;
+    let formattedContent = content.replace(/\n/g, '<br />');
     links.forEach(link => {
       if (link.text && link.url) {
         const anchorTag = `<a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.text}</a>`;
@@ -50,10 +50,10 @@ const CreateBlog = () => {
     });
 
     try {
-      const token = localStorage.getItem('token'); 
+      const token = localStorage.getItem('token');
       await axios.post('http://localhost:5000/api/blogs', { title, content: formattedContent }, {
         headers: {
-          Authorization: `Bearer ${token}` 
+          Authorization: `Bearer ${token}`
         }
       });
       setPopupMessage('Blog created successfully!');
