@@ -108,6 +108,7 @@ const EditBlog = () => {
           placeholder="Content"
           required
         />
+        <div className="link-container">
         {links.map((link, index) => (
           <div key={index} className="link-inputs">
             <input
@@ -125,6 +126,7 @@ const EditBlog = () => {
             <button type="button" onClick={() => handleRemoveLink(index)}>Remove</button>
           </div>
         ))}
+        </div>
         <button type="button" onClick={handleAddLink}>Add Another Link</button>
 
         <div className="button-container">
