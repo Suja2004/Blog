@@ -1,6 +1,5 @@
 import React from 'react';
-import './DeleteConfirmation.css'; // Import CSS for styling
-
+import './DeleteConfirmation.css'; 
 const DeleteConfirmation = ({ isVisible, onClose, onConfirm }) => {
   if (!isVisible) return null;
 
