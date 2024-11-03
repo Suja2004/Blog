@@ -24,9 +24,24 @@ const UserProfile = () => {
         fetchUserDetails();
     }, []);
 
+    const checkEmailDuplication = async (email) => {
+        try {
+            const response = await axios.post('http://localhost:5000/api/check-email', { email });
+            return response.data.exists; // `exists` should be a boolean indicating if the email is in use
+        } catch (error) {
+            console.error('Error checking email duplication:', error);
+            return true; // Return true to block the update in case of an error
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            if (await checkEmailDuplication(user.email)) {
+                setError('Email is already in use.');
+                return;
+            }
+
             const token = localStorage.getItem('token');
             await axios.put('http://localhost:5000/api/profile', user, {
                 headers: { Authorization: `Bearer ${token}` },

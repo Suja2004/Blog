@@ -36,7 +36,7 @@ const Register = () => {
 
         try {
             setError('');
-            await axios.post('http://localhost:5000/api/register', { username, password,email });
+            await axios.post('http://localhost:5000/api/register', { username, password, email });
             alert('Registration successful! You can now log in.');
             navigate('/login');
         } catch (error) {

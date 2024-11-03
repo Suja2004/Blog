@@ -29,7 +29,7 @@ mongoose.connect(mongoURI, {
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  email: { type: String, unique: true, default: null },
+  email: { type: String, default: null },
   isAnonymous: { type: Boolean, default: false },
 });
 const User = mongoose.model('User', userSchema);
@@ -141,7 +141,7 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ message: 'Username already taken' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword,email });
+    const newUser = new User({ username, password: hashedPassword, email });
     await newUser.save();
 
     res.status(201).json({ message: 'User registered successfully' });
@@ -220,6 +220,16 @@ app.put('/api/profile', authenticateJWT, async (req, res) => {
   } catch (error) {
     console.error('Error updating user profile:', error);
     res.status(400).json({ message: 'Error updating profile', error: error.message });
+  }
+});
+// In your backend
+app.post('/api/check-email', async (req, res) => {
+  const { email } = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
+    res.json({ exists: !!existingUser }); // Respond with whether the email exists
+  } catch (error) {
+    res.status(500).json({ message: 'Error checking email duplication' });
   }
 });
 
