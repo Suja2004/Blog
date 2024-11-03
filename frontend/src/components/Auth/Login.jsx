@@ -11,14 +11,14 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            setError(''); // Reset error message
-            const response = await axios.post('http://localhost:5000/api/login', { username, password });
+            setError(''); 
+            const response = await axios.post('https://blog-backend-oy0s.onrender.com/api/login', { username, password });
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('userId', response.data.userId); 
             navigate('/'); 
         } catch (error) {
             if (error.response) {
-                setError(error.response.data.message); // Handle specific error messages
+                setError(error.response.data.message);
             } else {
                 setError('Login failed. Please try again.');
             }
