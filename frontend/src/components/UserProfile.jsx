@@ -11,7 +11,7 @@ const UserProfile = () => {
         const fetchUserDetails = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get('http://localhost:5000/api/profile', {
+                const response = await axios.get('https://blog-backend-oy0s.onrender.com/api/profile', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setUser(response.data);
@@ -26,11 +26,11 @@ const UserProfile = () => {
 
     const checkEmailDuplication = async (email) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/check-email', { email });
-            return response.data.exists; // `exists` should be a boolean indicating if the email is in use
+            const response = await axios.post('https://blog-backend-oy0s.onrender.com/api/check-email', { email });
+            return response.data.exists; 
         } catch (error) {
             console.error('Error checking email duplication:', error);
-            return true; // Return true to block the update in case of an error
+            return true; 
         }
     };
 
@@ -43,7 +43,7 @@ const UserProfile = () => {
             }
 
             const token = localStorage.getItem('token');
-            await axios.put('http://localhost:5000/api/profile', user, {
+            await axios.put('https://blog-backend-oy0s.onrender.com/api/profile', user, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             alert('Profile updated successfully!');
