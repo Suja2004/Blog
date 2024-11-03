@@ -77,7 +77,7 @@ const CreateBlog = () => {
     }
   };
 
-  return (
+ return (
     <div className="create-blog">
       <h1>Create a New Blog</h1>
       <form onSubmit={handleSubmit}>
@@ -96,6 +96,7 @@ const CreateBlog = () => {
           required
         />
         <h3>Add Links:</h3>
+        <div className="link-container">
         {links.map((link, index) => (
           <div key={index} className="link-inputs">
             <input
@@ -113,6 +114,7 @@ const CreateBlog = () => {
             <button type="button" onClick={() => handleRemoveLink(index)}>Remove</button>
           </div>
         ))}
+        </div>
         <button type="button" onClick={handleAddLink}>Add More Links</button>
         <button type="submit">Create Blog</button>
       </form>
