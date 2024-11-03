@@ -6,25 +6,24 @@ const EditBlog = () => {
   const { id } = useParams();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [links, setLinks] = useState([{ text: '', url: '' }]); // Initialize with one link
+  const [links, setLinks] = useState([{ text: '', url: '' }]); 
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/blogs/${id}`);
+        const response = await axios.get(`https://blog-backend-oy0s.onrender.com/api/blogs/${id}`);
         setTitle(response.data.title);
-        setContent(response.data.content); // Preserve HTML formatting
+        setContent(response.data.content);
 
-        // Extract unique links from content
         const linkMatches = [...response.data.content.matchAll(/<a href="(.*?)">(.*?)<\/a>/g)];
         const existingLinks = linkMatches.map(match => ({
           text: match[2],
           url: match[1],
         }));
         
-        setLinks(existingLinks.length ? existingLinks : [{ text: '', url: '' }]); // Set links or initialize with an empty link
+        setLinks(existingLinks.length ? existingLinks : [{ text: '', url: '' }]); 
       } catch (error) {
         setError('Error fetching blog. Please try again later.');
         console.error('Error fetching blog:', error);
@@ -40,7 +39,7 @@ const EditBlog = () => {
   };
 
   const handleAddLink = () => {
-    setLinks([...links, { text: '', url: '' }]); // Add a new empty link
+    setLinks([...links, { text: '', url: '' }]);
   };
 
   const handleRemoveLink = (index) => {
@@ -51,7 +50,6 @@ const EditBlog = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    // Create formatted content with hyperlinks
     let formattedContent = content;
     const existingLinkUrls = new Set();
   
@@ -65,11 +63,11 @@ const EditBlog = () => {
     });
   
     const token = localStorage.getItem('token');
-    console.log("Submitting blog with token:", token); // Log the token
-    console.log("Content to update:", formattedContent); // Log the content being sent
+    console.log("Submitting blog with token:", token); 
+    console.log("Content to update:", formattedContent);
   
     try {
-      await axios.put(`http://localhost:5000/api/blogs/${id}`, {
+      await axios.put(`https://blog-backend-oy0s.onrender.com/api/blogs/${id}`, {
         title,
         content: formattedContent
       }, {
@@ -88,7 +86,7 @@ const EditBlog = () => {
   
 
   const handleCancel = () => {
-    navigate(`/blogs/${id}`); // Redirect to the blog post
+    navigate(`/blogs/${id}`); 
   };
 
   return (
@@ -129,7 +127,6 @@ const EditBlog = () => {
         ))}
         <button type="button" onClick={handleAddLink}>Add Another Link</button>
 
-        {/* Button container for side-by-side layout */}
         <div className="button-container">
           <button type="submit">Update Blog</button>
           <button className='cancel-btn' type="button" onClick={handleCancel}>Cancel</button>
