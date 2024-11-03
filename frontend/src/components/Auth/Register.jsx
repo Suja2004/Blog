@@ -10,7 +10,6 @@ const Register = () => {
     const [error, setError] = useState('');
     const [passwordStrength, setPasswordStrength] = useState('');
 
-    // Function to check password strength
     const checkPasswordStrength = (password) => {
         const minLength = password.length >= 8;
         const hasNumber = /\d/.test(password);
@@ -36,13 +35,13 @@ const Register = () => {
 
         try {
             setError('');
-            await axios.post('http://localhost:5000/api/register', { username, password, email });
+            await axios.post('https://blog-backend-oy0s.onrender.com/api/register', { username, password, email });
             alert('Registration successful! You can now log in.');
             navigate('/login');
         } catch (error) {
-            console.error('Error registering:', error); // Log error for debugging
+            console.error('Error registering:', error); 
             if (error.response && error.response.data) {
-                setError(error.response.data.message); // Display specific error message
+                setError(error.response.data.message); 
             } else {
                 setError('Registration failed. Please try again.');
             }
