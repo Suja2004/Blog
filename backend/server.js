@@ -118,10 +118,18 @@ app.post('/api/blogs/:id/like', authenticateJWT, async (req, res) => {
 
 app.post('/api/register', async (req, res) => {
   const { username, password, email } = req.body;
-  console.log(email);
 
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password are required' });
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: 'Username, email, and password are required' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (emailRegex.test(username)) {
+    return res.status(400).json({ message: 'Username cannot contain special characters' });
+  }
+
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: 'Invalid email format' });
   }
 
   try {
@@ -130,14 +138,23 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ message: 'Username already taken' });
     }
 
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const newUser = new User({ username, password: hashedPassword, email });
     await newUser.save();
+
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
+    console.error('Error registering user:', error);
     res.status(500).json({ message: 'Error registering user', error: error.message });
   }
 });
+
 
 
 app.post('/api/login', async (req, res) => {
