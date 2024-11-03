@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-    const [username, setUsername] = useState('');
+    const [usernameOrEmail, setUsernameOrEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -12,7 +12,7 @@ const Login = () => {
         e.preventDefault();
         try {
             setError(''); 
-            const response = await axios.post('https://blog-backend-oy0s.onrender.com/api/login', { username, password });
+            const response = await axios.post('https://blog-backend-oy0s.onrender.com/api/login', { usernameOrEmail, password });
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('userId', response.data.userId); 
             navigate('/'); 
@@ -32,9 +32,9 @@ const Login = () => {
                 <h2>Login</h2>
                 <input
                     type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
+                    value={usernameOrEmail}
+                    onChange={(e) => setUsernameOrEmail(e.target.value)}
+                    placeholder="Username or Email"
                     required
                 />
                 <input
@@ -55,3 +55,4 @@ const Login = () => {
 };
 
 export default Login;
+
