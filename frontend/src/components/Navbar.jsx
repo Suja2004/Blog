@@ -37,7 +37,7 @@ const Navbar = () => {
             <i className="fas fa-user-circle profile-icon" title="Profile" style={{ cursor: 'pointer' }}></i>
           </Link>
         ) : (
-          <Link to="/login" className={location.pathname === '/login' ? 'active' : ''}>Login</Link>
+          <Link to="/login" className={location.pathname === '/login' || location.pathname === '/register' ? 'active' : ''}>Login</Link>
         )}
       </div>
       <div className="hamburger" onClick={toggleMenu}>
