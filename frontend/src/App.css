@@ -633,4 +633,12 @@ textarea {
   .link-inputs button {
     margin-bottom: 10px;
   }
+
+  .auth-container{
+    margin: 0;
+    height: 100%;
+  }
+  .auth-form{
+    width: 100%;
+  }
 }
