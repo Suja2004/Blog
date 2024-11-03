@@ -48,8 +48,7 @@ const Register = () => {
         }
     };
 
-
-    return (
+return (
         <div className="auth-container">
             <form onSubmit={handleSubmit} className="auth-form">
                 <h2>Register</h2>
@@ -61,15 +60,24 @@ const Register = () => {
                     required
                 />
                 <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email"
+                    required
+                />
+                <input
                     type="password"
                     value={password}
                     onChange={handlePasswordChange}
                     placeholder="Password"
                     required
                 />
-                <p className={`password-strength ${passwordStrength.toLowerCase()}`}>
-                    Password strength: {passwordStrength}
-                </p>
+                {password && (
+                    <p className={`password-strength ${passwordStrength.toLowerCase()}`}>
+                        Password strength: {passwordStrength}
+                    </p>
+                )}
                 <button type="submit">Register</button>
                 {error && <p className='error-message'>{error}</p>}
                 <p>
@@ -81,3 +89,4 @@ const Register = () => {
 };
 
 export default Register;
+
