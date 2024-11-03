@@ -7,7 +7,7 @@ const CreateBlog = () => {
   const [links, setLinks] = useState([{ text: '', url: '' }]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to check if user is logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -51,7 +51,7 @@ const CreateBlog = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/blogs', { title, content: formattedContent }, {
+      await axios.post('https://blog-backend-oy0s.onrender.com/api/blogs', { title, content: formattedContent }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
