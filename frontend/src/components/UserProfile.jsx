@@ -11,7 +11,7 @@ const UserProfile = () => {
         const fetchUserDetails = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get('https://blog-backend-oy0s.onrender.com/api/profile', {
+                const response = await axios.get('https://blog-backend-vert.vercel.app/api/profile', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setUser(response.data);
@@ -31,7 +31,7 @@ const UserProfile = () => {
         try {
             
             const token = localStorage.getItem('token');
-            await axios.put('https://blog-backend-oy0s.onrender.com/api/profile', user, {
+            await axios.put('https://blog-backend-vert.vercel.app/api/profile', user, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             alert('Profile updated successfully!');
