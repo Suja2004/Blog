@@ -35,7 +35,7 @@ const Register = () => {
 
         try {
             setError('');
-            await axios.post('https://blog-backend-oy0s.onrender.com/api/register', { username, password, email });
+            await axios.post('https://blog-backend-vert.vercel.app/api/register', { username, password, email });
             alert('Registration successful! You can now log in.');
             navigate('/login');
         } catch (error) {
