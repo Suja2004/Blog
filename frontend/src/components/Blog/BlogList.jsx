@@ -21,7 +21,7 @@ const BlogList = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await axios.get('https://blog-backend-oy0s.onrender.com/api/blogs');
+        const response = await axios.get('https://blog-backend-vert.vercel.app/api/blogs');
         const sortedBlogs = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setBlogs(sortedBlogs);
       } catch (error) {
@@ -39,7 +39,7 @@ const BlogList = () => {
   
     if (blogToDelete) {
       try {
-        await axios.delete(`https://blog-backend-oy0s.onrender.com/api/blogs/${blogToDelete}`, {
+        await axios.delete(`https://blog-backend-vert.vercel.app/api/blogs/${blogToDelete}`, {
           headers: {
             Authorization: `Bearer ${token}` 
           }
