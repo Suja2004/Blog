@@ -12,7 +12,7 @@ const Login = () => {
         e.preventDefault();
         try {
             setError(''); 
-            const response = await axios.post('https://blog-backend-oy0s.onrender.com/api/login', { usernameOrEmail, password });
+            const response = await axios.post('https://blog-backend-vert.vercel.app/api/login', { usernameOrEmail, password });
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('userId', response.data.userId); 
             navigate('/'); 
