@@ -51,7 +51,7 @@ const CreateBlog = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post('https://blog-backend-oy0s.onrender.com/api/blogs', { title, content: formattedContent }, {
+      await axios.post('https://blog-backend-vert.vercel.app/api/blogs', { title, content: formattedContent }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
