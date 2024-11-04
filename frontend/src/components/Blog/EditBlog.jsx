@@ -13,7 +13,7 @@ const EditBlog = () => {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const response = await axios.get(`https://blog-backend-oy0s.onrender.com/api/blogs/${id}`);
+        const response = await axios.get(`https://blog-backend-vert.vercel.app/api/blogs/${id}`);
         setTitle(response.data.title);
         setContent(response.data.content);
 
@@ -67,7 +67,7 @@ const EditBlog = () => {
     console.log("Content to update:", formattedContent);
   
     try {
-      await axios.put(`https://blog-backend-oy0s.onrender.com/api/blogs/${id}`, {
+      await axios.put(`https://blog-backend-vert.vercel.app/api/blogs/${id}`, {
         title,
         content: formattedContent
       }, {
