@@ -25,7 +25,7 @@ const BlogList = () => {
         const sortedBlogs = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setBlogs(sortedBlogs);
       } catch (error) {
-        setError('Error fetching blogs. Please try again later.');
+        setError('Server Down.');
         console.error('Error fetching blogs:', error);
       } finally {
         setLoading(false);
